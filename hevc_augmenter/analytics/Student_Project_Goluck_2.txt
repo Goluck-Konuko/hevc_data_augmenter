@@ -1,0 +1,23 @@
+scheme 1: only random augemented data
+scheme 2: original + random augmented data
+scheme 3: original + augmented with hevc mode information
+
+QP25
+without augmentation (epoch 100):
+MSE_HEVC: 438.7401806927683 MSE_CE: 255.40149632838475 ImprovedImages: 53794 / 83008
+Scheme 1: with augmentation (epoch 100):
+MSE_HEVC: 438.7401806927683 MSE_CE: 399.71468819741017 ImprovedImages: 36995 / 83008
+Scheme 2: with augmentation (epoch 100):
+MSE_HEVC: 438.65521124940517 MSE_CE: 304.7091024923802 ImprovedImages: 44473 / 83008
+Scheme 3: with augmentation (epoch 40):
+MSE_HEVC: 438.65521124940517 MSE_CE: 309.09069388925616 ImprovedImages: 47570 / 83008
+
+QP35
+without augmentation (epoch 100):
+MSE_HEVC: 428.46245460245547 MSE_CE: 283.7442459777032 ImprovedImages: 49910 / 83008
+Scheme: with augmentation (epoch 100):
+MSE_HEVC: 428.46245460245547 MSE_CE: 414.1808237091982 ImprovedImages: 33334 / 83008
+Scheme 2: with augmentation  (epoch 100):
+MSE_HEVC: 428.3999195084171 MSE_CE: 324.0247276735563 ImprovedImages: 40833 / 83008
+Scheme 3: with augmentation (epoch 40):
+MSE_HEVC: 428.3999195084171 MSE_CE: 317.30076832061746 ImprovedImages: 45389 / 83008
