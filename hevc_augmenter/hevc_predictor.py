@@ -5,11 +5,11 @@ HEVC intra-prediction
 --33 angular modes(Mode 2-34) 
 --Compute the nearest 5 neighbors of the hevc prediction for data augmentation
 '''
-import numpy as np
 import cv2
-from skimage.measure import compare_ssim
-from copy import deepcopy
 import random
+import numpy as np
+from copy import deepcopy
+from skimage.metrics import structural_similarity as compare_ssim
 
 class Predictor(object):
     def __init__(self,odp = None,block_size = 32,bit_depth=8, filepath = None,diskpath = None,patch=None,multiplier = 5):
@@ -420,97 +420,6 @@ class Predictor(object):
                 for i in range(self.block_size):
                     for j in range(self.block_size):
                         self.pred_out[i,j] = main_reference[j+1]
-            else:
-                displacement = -(mode_displacement[negative_modes.index(mode)])
-                inv_angle = (256*32)/displacement
-                #extend the main reference according to the negative prediction directions
-                for i in range(1,self.block_size):
-                    index = -1+(int(-i*inv_angle+128)>>8)
-                    if(index<=self.block_size-1):
-                        main_reference_ext.append(self.left_ref[index])
-                #create a new reference array with extension for negative angles
-                extension_len = len(main_reference_ext)
-                for val in main_reference_ext:
-                    main_reference = np.insert(main_reference,0,val)
-                for x in range(self.block_size):
-                    for y in range(self.block_size):
-                        c = (y*displacement)>>5
-                        w = (y*displacement) and 31
-                        i = x + c 
-                        self.pred_out[x,y] = int(((32-w)*main_reference[i+1+extension_len] + w*main_reference[i+2+extension_len]+16)/32)
-        return self.pred_out
-
- 
-        '''
-        Generates an angular prediction from a given context
-        '''
-        #select the main reference depending on the mode
-        mode_displacement = [32,26,21,17,13,9,5,2]
-        mode_displacement_inv = [2,5,9,13,17,21,26,32] 
-        main_reference = []
-        # pred_angular = np.zeros((self.block_size,self.block_size)) #prediction output
-        if(mode >= 2 and mode < 18):#left context is the main reference for these modes
-            main_reference = self.left_ref
-            main_reference_ext = [] #extension used for modes with negative displacement
-            positive_modes = [mode for mode in range(2,10)]
-            negative_modes = [mode for mode in range(11,18)]#handle with inverse angles when extedinding the reference samples
-            #set the mode displacement
-            displacement = 0
-            if(mode in positive_modes and mode != 10):
-                displacement = mode_displacement[positive_modes.index(mode)]
-                #predictions for modes with positive displacement
-                for x in range(self.block_size):
-                    for y in range(self.block_size):
-                        #calculate the pixel projection on to the reference array
-                        c = (y*displacement)>>5  #offset
-                        w = (y*displacement) and 31 #weighting factor
-                        i = x + c #index of the reference pixel
-                        #estimate the pixel value as the weighted sum of pixel at position i and i+1
-                        self.pred_out[x,y] = int(((32-w)*main_reference[i] + w*main_reference[i+1])/32)
-
-            elif(mode==10 ):
-                for i in range(self.block_size):
-                    for j in range(self.block_size):
-                        self.pred_out[i,j] = int(main_reference[i]) #pure horizontal prediction
-            else:
-                displacement = -(mode_displacement_inv[negative_modes.index(mode)])
-                inv_angle = (256*32)/displacement #compute an equivalent of the negative angle
-                #extend the main reference according to the negative prediction directions
-                for i in range(1,self.block_size):
-                    index = -1+(int(-i*inv_angle+128)>>8)
-                    if(index<=self.block_size-1):
-                        main_reference_ext.append(self.top_ref[index])
-                #create a new reference array with extension for negative angles
-                extension_len = len(main_reference_ext)
-                #insert the top left context to the left ref array
-                main_reference = np.insert(main_reference,0,self.top_ref[0])
-                for val in main_reference_ext:
-                    main_reference = np.insert(main_reference,0,val)
-                #prediction for modes with negative displacement
-                for x in range(self.block_size):
-                    for y in range(self.block_size):
-                        c = (y*displacement)>>5
-                        w = (y*displacement) and 31
-                        i = x + c
-                        #if i is negative use the extended reference array 
-                        self.pred_out[x,y] = int(((32-w)*main_reference[i+1+extension_len] + w*main_reference[i+2+extension_len]+16)/32)
-        else:#top reference is used otherwise
-            main_reference = self.top_ref
-            main_reference_ext = []
-            positive_modes = [mode for mode in range(26,35)]
-            negative_modes = [mode for mode in range(18,26)]
-            if(mode in positive_modes and mode != 26):
-                displacement = mode_displacement_inv[positive_modes.index(mode)-1]
-                for x in range(self.block_size):
-                    for y in range(self.block_size):
-                        c = (y*displacement)>>5
-                        w = (y*displacement) and 31
-                        i = x + c
-                        self.pred_out[x,y] = int(((32-w)*main_reference[i+1] + w*main_reference[i+2]+16)/32)
-            elif(mode==26): #pure vertical prediction
-                for i in range(self.block_size):
-                    for j in range(self.block_size):
-                        self.pred_out[i,j] = main_reference[j+1].astype('uint8')
             else:
                 displacement = -(mode_displacement[negative_modes.index(mode)])
                 inv_angle = (256*32)/displacement
