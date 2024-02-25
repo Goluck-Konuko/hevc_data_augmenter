@@ -1,8 +1,6 @@
 from tqdm import tqdm
 from argparse import ArgumentParser
 from augmenter import offline_augmenter
-import numpy as np
-import cv2
 import glob
 import os
 
