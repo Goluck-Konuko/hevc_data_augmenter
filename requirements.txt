@@ -14,7 +14,7 @@ cycler==0.10.0
 DateTime==4.3
 example-package-goluck==1.0.0
 example-package-name==1.0.0
-future==0.18.2
+future==0.18.3
 gast==0.2.2
 glob2==0.7
 matplotlib==3.1.3
